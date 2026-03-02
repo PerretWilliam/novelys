@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/package",
+  "name": "readingos",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel --ui=tui --filter=@readingos/shared --filter=@readingos/api --filter=@readingos/web --filter=@readingos/mobile",
+    "dev:stream": "turbo run dev --parallel --ui=stream --filter=@readingos/shared --filter=@readingos/api --filter=@readingos/web --filter=@readingos/mobile",
+    "dev:web": "pnpm --filter @readingos/web dev",
+    "dev:mobile": "pnpm --filter @readingos/mobile dev",
+    "dev:api": "pnpm --filter @readingos/api dev",
+    "build": "pnpm -r --filter @readingos/shared --filter @readingos/api --filter @readingos/web --filter @readingos/mobile build",
+    "typecheck": "pnpm -r --filter @readingos/shared --filter @readingos/api --filter @readingos/web --filter @readingos/mobile typecheck",
+    "lint": "pnpm -r --filter @readingos/shared --filter @readingos/api --filter @readingos/web --filter @readingos/mobile lint",
+    "db:generate": "pnpm --filter @readingos/api db:generate",
+    "db:migrate": "pnpm --filter @readingos/api db:migrate"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.11"
+  }
+}
