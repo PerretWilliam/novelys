@@ -3,14 +3,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { CoverImage } from "../../components/CoverImage";
 import { StateText } from "../../components/StateText";
 import { StatusSelector } from "../../components/StatusSelector";
@@ -32,9 +25,7 @@ export const LibraryItemScreen = () => {
   const { showToast } = useToast();
   const item = getById(itemId);
 
-  const [status, setStatus] = useState<LibraryStatus>(
-    item?.status ?? "to_read",
-  );
+  const [status, setStatus] = useState<LibraryStatus>(item?.status ?? "to_read");
   const [rating, setRating] = useState(item?.rating ? String(item.rating) : "");
   const [review, setReview] = useState(item?.review ?? "");
   const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -57,11 +48,7 @@ export const LibraryItemScreen = () => {
   }, [lists, selectedListId]);
 
   if (!item) {
-    return (
-      <StateText
-        message={isLoading ? "Chargement..." : "Élément introuvable."}
-      />
-    );
+    return <StateText message={isLoading ? "Chargement..." : "Élément introuvable."} />;
   }
 
   const onSave = async () => {
@@ -73,10 +60,7 @@ export const LibraryItemScreen = () => {
       });
       showToast("Modifications enregistrées.", "success");
     } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Mise à jour impossible",
-        "error",
-      );
+      showToast(err instanceof Error ? err.message : "Mise à jour impossible", "error");
     }
   };
 
@@ -86,10 +70,7 @@ export const LibraryItemScreen = () => {
       showToast("Livre supprimé.", "success");
       navigation.goBack();
     } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Suppression impossible",
-        "error",
-      );
+      showToast(err instanceof Error ? err.message : "Suppression impossible", "error");
     }
   };
 
@@ -104,41 +85,25 @@ export const LibraryItemScreen = () => {
       setIsListModalOpen(false);
       showToast("Livre ajouté à la liste.", "success");
     } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Ajout à la liste impossible",
-        "error",
-      );
+      showToast(err instanceof Error ? err.message : "Ajout à la liste impossible", "error");
     }
   };
 
   const openListModal = () => {
     if (lists.length === 0) {
-      showToast(
-        "Créez d'abord une liste personnalisée dans l'onglet Listes.",
-        "error",
-      );
+      showToast("Créez d'abord une liste personnalisée dans l'onglet Listes.", "error");
       return;
     }
     setIsListModalOpen(true);
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-brand-50 dark:bg-slate-950"
-      contentContainerClassName="pb-8"
-    >
+    <ScrollView className="flex-1 bg-brand-50 dark:bg-slate-950" contentContainerClassName="pb-8">
       <View className="bg-brand-50 px-4 py-4 dark:bg-slate-950">
         <View className="flex-row">
-          <CoverImage
-            uri={item.book.thumbnail}
-            title={item.book.title}
-            className="h-44 w-32 rounded-xl"
-          />
+          <CoverImage uri={item.book.thumbnail} title={item.book.title} className="h-44 w-32 rounded-xl" />
           <View className="ml-3 flex-1">
-            <Text
-              className="text-lg font-black text-slate-900 dark:text-slate-100"
-              numberOfLines={3}
-            >
+            <Text className="text-lg font-black text-slate-900 dark:text-slate-100" numberOfLines={3}>
               {item.book.title}
             </Text>
             <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">
@@ -172,56 +137,31 @@ export const LibraryItemScreen = () => {
           <Text className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
             Listes personnalisées
           </Text>
-          <Pressable
-            className="rounded-xl bg-slate-900 px-4 py-3"
-            onPress={openListModal}
-          >
-            <Text className="text-center font-black text-white">
-              Choisir une liste
-            </Text>
+          <Pressable className="rounded-xl bg-slate-900 px-4 py-3" onPress={openListModal}>
+            <Text className="text-center font-black text-white">Choisir une liste</Text>
           </Pressable>
           {selectedListName ? (
             <Text className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-              Liste sélectionnée:{" "}
-              <Text className="font-bold text-slate-800 dark:text-slate-100">
-                {selectedListName}
-              </Text>
+              Liste sélectionnée: <Text className="font-bold text-slate-800 dark:text-slate-100">{selectedListName}</Text>
             </Text>
           ) : null}
         </View>
 
         <View className="mt-4 flex-row gap-2">
-          <Pressable
-            className="flex-1 rounded-xl bg-brand-700 px-4 py-3"
-            onPress={() => void onSave()}
-          >
-            <Text className="text-center font-black text-white">
-              Enregistrer
-            </Text>
+          <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onSave()}>
+            <Text className="text-center font-black text-white">Enregistrer</Text>
           </Pressable>
-          <Pressable
-            className="flex-1 rounded-xl bg-red-700 px-4 py-3"
-            onPress={() => void onDelete()}
-          >
+          <Pressable className="flex-1 rounded-xl bg-red-700 px-4 py-3" onPress={() => void onDelete()}>
             <Text className="text-center font-black text-white">Supprimer</Text>
           </Pressable>
         </View>
       </View>
 
-      <Modal
-        animationType="fade"
-        transparent
-        visible={isListModalOpen}
-        onRequestClose={() => setIsListModalOpen(false)}
-      >
+      <Modal animationType="fade" transparent visible={isListModalOpen} onRequestClose={() => setIsListModalOpen(false)}>
         <View className="flex-1 items-center justify-center bg-slate-900/55 px-5">
           <View className={`w-full rounded-2xl p-4 ${cardSurfaceClass}`}>
-            <Text className="text-lg font-black text-slate-900 dark:text-slate-100">
-              Choisir une liste
-            </Text>
-            <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Sélectionnez où ajouter ce livre.
-            </Text>
+            <Text className="text-lg font-black text-slate-900 dark:text-slate-100">Choisir une liste</Text>
+            <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">Sélectionnez où ajouter ce livre.</Text>
 
             <View className="mt-4 max-h-72">
               <ScrollView contentContainerClassName="gap-2 pb-2">
@@ -229,24 +169,18 @@ export const LibraryItemScreen = () => {
                   <Pressable
                     key={list.id}
                     className={`rounded-lg px-3 py-3 ${
-                      selectedListId === list.id
-                        ? "bg-brand-100 dark:bg-slate-700"
-                        : cardInsetClass
+                      selectedListId === list.id ? "bg-brand-100 dark:bg-slate-700" : cardInsetClass
                     }`}
                     onPress={() => setSelectedListId(list.id)}
                   >
                     <Text
                       className={`text-sm font-black ${
-                        selectedListId === list.id
-                          ? "text-brand-700 dark:text-brand-100"
-                          : "text-slate-800 dark:text-slate-100"
+                        selectedListId === list.id ? "text-brand-700 dark:text-brand-100" : "text-slate-800 dark:text-slate-100"
                       }`}
                     >
                       {list.name}
                     </Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">
-                      {list.itemCount} livre(s)
-                    </Text>
+                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">{list.itemCount} livre(s)</Text>
                   </Pressable>
                 ))}
               </ScrollView>
@@ -257,17 +191,10 @@ export const LibraryItemScreen = () => {
                 className="flex-1 rounded-xl bg-slate-200 px-4 py-3 dark:bg-slate-700"
                 onPress={() => setIsListModalOpen(false)}
               >
-                <Text className="text-center font-black text-slate-700 dark:text-slate-100">
-                  Annuler
-                </Text>
+                <Text className="text-center font-black text-slate-700 dark:text-slate-100">Annuler</Text>
               </Pressable>
-              <Pressable
-                className="flex-1 rounded-xl bg-brand-700 px-4 py-3"
-                onPress={() => void onAddToList()}
-              >
-                <Text className="text-center font-black text-white">
-                  Ajouter
-                </Text>
+              <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onAddToList()}>
+                <Text className="text-center font-black text-white">Ajouter</Text>
               </Pressable>
             </View>
           </View>

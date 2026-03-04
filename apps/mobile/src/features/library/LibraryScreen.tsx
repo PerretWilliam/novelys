@@ -10,10 +10,7 @@ import { StateText } from "../../components/StateText";
 import { useLibrary } from "../../contexts/LibraryContext";
 import { statusLabel } from "../../lib/status";
 import { cardInsetClass } from "../../lib/ui";
-import type {
-  MainTabParamList,
-  RootStackParamList,
-} from "../../navigation/types";
+import type { MainTabParamList, RootStackParamList } from "../../navigation/types";
 
 type LibraryRoute = RouteProp<MainTabParamList, "LibraryTab">;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
@@ -38,9 +35,7 @@ export const LibraryScreen = () => {
     <ScrollView className="flex-1" contentContainerClassName="pb-8">
       <View className="mb-3 flex-row items-center gap-2">
         <Ionicons name="library" size={20} color="#0F4C81" />
-        <Text className="text-xl font-black text-slate-900 dark:text-slate-100">
-          Bibliothèque
-        </Text>
+        <Text className="text-xl font-black text-slate-900 dark:text-slate-100">Bibliothèque</Text>
       </View>
 
       <TextInput
@@ -52,28 +47,22 @@ export const LibraryScreen = () => {
       />
 
       <View className="mb-3 flex-row flex-wrap gap-2">
-        {(["all", "to_read", "reading", "read", "abandoned"] as const).map(
-          (value) => (
-            <Pressable
-              key={value}
-              className={`rounded-full px-3 py-2 ${status === value ? "bg-brand-700" : "bg-brand-50 dark:bg-slate-700"}`}
-              onPress={() => setStatus(value)}
-            >
-              <Text
-                className={`text-xs font-black ${status === value ? "text-white" : "text-brand-700 dark:text-brand-100"}`}
-              >
-                {value === "all" ? "Toutes" : statusLabel[value]}
-              </Text>
-            </Pressable>
-          ),
-        )}
+        {(["all", "to_read", "reading", "read", "abandoned"] as const).map((value) => (
+          <Pressable
+            key={value}
+            className={`rounded-full px-3 py-2 ${status === value ? "bg-brand-700" : "bg-brand-50 dark:bg-slate-700"}`}
+            onPress={() => setStatus(value)}
+          >
+            <Text className={`text-xs font-black ${status === value ? "text-white" : "text-brand-700 dark:text-brand-100"}`}>
+              {value === "all" ? "Toutes" : statusLabel[value]}
+            </Text>
+          </Pressable>
+        ))}
       </View>
 
       {isLoading ? <StateText message="Chargement..." /> : null}
       {error ? <StateText message={error} kind="error" /> : null}
-      {!isLoading && items.length === 0 ? (
-        <StateText message="Aucun livre dans ce filtre." />
-      ) : null}
+      {!isLoading && items.length === 0 ? <StateText message="Aucun livre dans ce filtre." /> : null}
 
       <View className="mt-1">
         {items.map((item) => (
@@ -81,9 +70,7 @@ export const LibraryScreen = () => {
             key={item.id}
             book={item.book}
             status={item.status}
-            onPress={() =>
-              navigation.navigate("LibraryItem", { itemId: item.id })
-            }
+            onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
           />
         ))}
       </View>

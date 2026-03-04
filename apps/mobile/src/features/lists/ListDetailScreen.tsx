@@ -1,8 +1,4 @@
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ReadingListDetails } from "@readingos/shared";
@@ -22,11 +18,7 @@ export const ListDetailScreen = () => {
   const navigation = useNavigation<RootNavigation>();
   const route = useRoute<ListDetailRoute>();
   const { listId } = route.params;
-  const {
-    items: libraryItems,
-    isLoading: isLibraryLoading,
-    refresh: refreshLibrary,
-  } = useLibrary();
+  const { items: libraryItems, isLoading: isLibraryLoading, refresh: refreshLibrary } = useLibrary();
   const { getList, addItem, removeItem } = useReadingLists();
   const { showToast } = useToast();
 
@@ -41,9 +33,7 @@ export const ListDetailScreen = () => {
       const next = await getList(listId);
       setList(next);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Impossible de charger la liste",
-      );
+      setError(err instanceof Error ? err.message : "Impossible de charger la liste");
     } finally {
       setIsLoading(false);
     }
@@ -67,15 +57,9 @@ export const ListDetailScreen = () => {
     }, [loadList, refreshLibrary]),
   );
 
-  const existingIds = useMemo(
-    () => new Set((list?.items ?? []).map((item) => item.id)),
-    [list?.items],
-  );
+  const existingIds = useMemo(() => new Set((list?.items ?? []).map((item) => item.id)), [list?.items]);
 
-  const candidates = useMemo(
-    () => libraryItems.filter((item) => !existingIds.has(item.id)),
-    [libraryItems, existingIds],
-  );
+  const candidates = useMemo(() => libraryItems.filter((item) => !existingIds.has(item.id)), [libraryItems, existingIds]);
 
   const onAdd = async (libraryItemId: number) => {
     try {
@@ -83,10 +67,7 @@ export const ListDetailScreen = () => {
       await Promise.all([loadList(), refreshLibrary()]);
       showToast("Livre ajouté à la liste.", "success");
     } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Ajout impossible",
-        "error",
-      );
+      showToast(err instanceof Error ? err.message : "Ajout impossible", "error");
     }
   };
 
@@ -96,43 +77,28 @@ export const ListDetailScreen = () => {
       await Promise.all([loadList(), refreshLibrary()]);
       showToast("Livre retiré de la liste.", "success");
     } catch (err) {
-      showToast(
-        err instanceof Error ? err.message : "Suppression impossible",
-        "error",
-      );
+      showToast(err instanceof Error ? err.message : "Suppression impossible", "error");
     }
   };
 
   return (
     <ScrollView className="flex-1" contentContainerClassName="px-3 pb-8">
-      <Text className="mb-1 text-xl font-black text-slate-900 dark:text-slate-100">
-        {list?.name ?? "Liste"}
-      </Text>
-      <Text className="mb-3 text-sm text-slate-500 dark:text-slate-300">
-        {list?.items.length ?? 0} livre(s)
-      </Text>
+      <Text className="mb-1 text-xl font-black text-slate-900 dark:text-slate-100">{list?.name ?? "Liste"}</Text>
+      <Text className="mb-3 text-sm text-slate-500 dark:text-slate-300">{list?.items.length ?? 0} livre(s)</Text>
 
       {isLoading ? <StateText message="Chargement..." /> : null}
-      {isLibraryLoading ? (
-        <StateText message="Chargement de la bibliothèque..." />
-      ) : null}
+      {isLibraryLoading ? <StateText message="Chargement de la bibliothèque..." /> : null}
       {error ? <StateText message={error} kind="error" /> : null}
 
       <View className="mb-6">
-        <Text className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
-          Dans cette liste
-        </Text>
-        {!isLoading && (list?.items.length ?? 0) === 0 ? (
-          <StateText message="Aucun livre dans cette liste." />
-        ) : null}
+        <Text className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">Dans cette liste</Text>
+        {!isLoading && (list?.items.length ?? 0) === 0 ? <StateText message="Aucun livre dans cette liste." /> : null}
         {list?.items.map((item) => (
           <BookListItem
             key={item.id}
             book={item.book}
             status={item.status}
-            onPress={() =>
-              navigation.navigate("LibraryItem", { itemId: item.id })
-            }
+            onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
             actions={[
               {
                 key: `remove-${item.id}`,
@@ -152,17 +118,13 @@ export const ListDetailScreen = () => {
         <Text className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
           Ajouter depuis ma bibliothèque
         </Text>
-        {candidates.length === 0 ? (
-          <StateText message="Tous les livres sont déjà dans la liste." />
-        ) : null}
+        {candidates.length === 0 ? <StateText message="Tous les livres sont déjà dans la liste." /> : null}
         {candidates.map((item) => (
           <BookListItem
             key={item.id}
             book={item.book}
             status={item.status}
-            onPress={() =>
-              navigation.navigate("LibraryItem", { itemId: item.id })
-            }
+            onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
             actions={[
               {
                 key: `add-${item.id}`,
