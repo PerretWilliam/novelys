@@ -1,0 +1,10 @@
+.git
+.gitignore
+.turbo
+node_modules
+**/node_modules
+**/dist
+apps
+services/api/data
+services/api/.env
+.env
