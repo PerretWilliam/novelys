@@ -24,6 +24,11 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // RN 0.83 on Android can crash if Appearance receives a null/invalid style.
+    // Nativewind maps "system" to that path, so only force explicit styles here.
+    if (themeMode === "system") {
+      return;
+    }
     setColorScheme(themeMode);
     // Intentionally only react to themeMode changes to avoid render loops.
     // eslint-disable-next-line react-hooks/exhaustive-deps
