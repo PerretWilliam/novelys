@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import { env } from "./config/env";
+import { apiTokenAuth } from "./middleware/api-token-auth";
 import { errorHandler } from "./middleware/error-handler";
 import { booksRouter } from "./modules/books/search.routes";
 import { libraryRouter } from "./modules/library/library.routes";
@@ -36,6 +37,7 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
+app.use("/api", apiTokenAuth);
 app.use("/api", booksRouter);
 app.use("/api", libraryRouter);
 app.use("/api", listsRouter);
