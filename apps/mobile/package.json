@@ -1,7 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "@readingos/mobile",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Novelys mobile application (Expo + React Native).",
+  "author": "Perret William <william.perret@hotmail.com>",
+  "license": "MIT",
   "main": "index.ts",
   "private": true,
   "scripts": {

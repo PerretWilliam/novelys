@@ -1,7 +1,10 @@
 {
   "name": "@readingos/api",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Novelys backend API (Express + SQLite).",
+  "author": "Perret William <william.perret@hotmail.com>",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -10,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@readingos/shared": "workspace:*",

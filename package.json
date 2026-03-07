@@ -1,8 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "readingos",
+  "name": "novelys",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Novelys monorepo (API, mobile, shared).",
+  "author": "Perret William <william.perret@hotmail.com>",
+  "license": "MIT",
   "packageManager": "pnpm@10.20.0",
   "scripts": {
     "dev": "turbo run dev --parallel --ui=tui --filter=@readingos/shared --filter=@readingos/api --filter=@readingos/mobile",
@@ -14,7 +17,8 @@
     "typecheck": "pnpm -r --filter @readingos/shared --filter @readingos/api --filter @readingos/mobile typecheck",
     "lint": "pnpm -r --filter @readingos/shared --filter @readingos/api --filter @readingos/mobile lint",
     "db:generate": "pnpm --filter @readingos/api db:generate",
-    "db:migrate": "pnpm --filter @readingos/api db:migrate"
+    "db:migrate": "pnpm --filter @readingos/api db:migrate",
+    "db:seed": "pnpm --filter @readingos/api db:seed"
   },
   "devDependencies": {
     "turbo": "^2.8.11"
