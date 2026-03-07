@@ -13,6 +13,7 @@ COPY packages/shared/package.json packages/shared/package.json
 RUN pnpm install --frozen-lockfile --filter @readingos/api...
 
 FROM deps AS build
+ENV CI=true
 COPY tsconfig.base.json turbo.json ./
 COPY packages/shared packages/shared
 COPY services/api services/api
@@ -27,6 +28,7 @@ WORKDIR /app
 COPY --from=build /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/package.json ./
 COPY --from=build /app/services/api ./services/api
 COPY --from=build /app/packages/shared ./packages/shared
+COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/services/api/node_modules ./services/api/node_modules
 
 WORKDIR /app/services/api
