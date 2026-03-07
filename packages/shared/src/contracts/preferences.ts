@@ -6,8 +6,6 @@ export const themeModeSchema = z.enum(["system", "light", "dark"]);
 export const preferencesSchema = z.object({
   searchLang: searchLangSchema,
   themeMode: themeModeSchema,
-  showCovers: z.boolean(),
-  compactMode: z.boolean(),
   updatedAt: z.string(),
 });
 
@@ -15,11 +13,9 @@ export const updatePreferencesInputSchema = z
   .object({
     searchLang: searchLangSchema.optional(),
     themeMode: themeModeSchema.optional(),
-    showCovers: z.boolean().optional(),
-    compactMode: z.boolean().optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
-    message: "At least one field must be provided",
+    message: "Au moins un champ doit etre fourni.",
   });
 
 export type SearchLang = z.infer<typeof searchLangSchema>;

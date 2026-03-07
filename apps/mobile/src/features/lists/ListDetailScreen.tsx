@@ -98,6 +98,7 @@ export const ListDetailScreen = () => {
             key={item.id}
             book={item.book}
             status={item.status}
+            rating={item.rating}
             onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
             actions={[
               {
@@ -124,6 +125,7 @@ export const ListDetailScreen = () => {
             key={item.id}
             book={item.book}
             status={item.status}
+            rating={item.rating}
             onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
             actions={[
               {

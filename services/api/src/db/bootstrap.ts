@@ -17,8 +17,8 @@ export const bootstrapDatabase = async (): Promise<void> => {
   rawDb
     .prepare(
       `
-        INSERT INTO user_preferences (id, search_lang, theme_mode, show_covers, compact_mode, updated_at)
-        VALUES (1, 'fr', 'system', 1, 0, ?)
+        INSERT INTO user_preferences (id, search_lang, theme_mode, updated_at)
+        VALUES (1, 'fr', 'system', ?)
         ON CONFLICT(id) DO NOTHING
       `,
     )

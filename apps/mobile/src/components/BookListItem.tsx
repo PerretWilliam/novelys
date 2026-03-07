@@ -1,8 +1,8 @@
 import type { Book, LibraryStatus } from "@readingos/shared";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { memo } from "react";
 import type { GestureResponderEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
-import { usePreferences } from "../contexts/PreferencesContext";
 import { formatPublishedDate } from "../lib/date";
 import { cardSurfaceClass } from "../lib/ui";
 import { CoverImage } from "./CoverImage";
@@ -19,19 +19,27 @@ type Props = {
   book: Book;
   onPress: () => void;
   status?: LibraryStatus;
+  rating?: number;
   actions?: BookListItemAction[];
 };
 
-const BookListItemComponent = ({ book, onPress, status, actions = [] }: Props) => {
-  const { showCovers, compactMode } = usePreferences();
+const iconForRating = (rating: number, star: number): keyof typeof Ionicons.glyphMap => {
+  if (rating >= star) {
+    return "star";
+  }
+  if (rating >= star - 0.5) {
+    return "star-half";
+  }
+  return "star-outline";
+};
+
+const BookListItemComponent = ({ book, onPress, status, rating, actions = [] }: Props) => {
+  const shouldShowRating = status !== undefined && typeof rating === "number" && rating > 0;
 
   return (
-    <Pressable
-      className={`mb-3 rounded-2xl p-3 shadow-soft ${cardSurfaceClass} ${compactMode ? "" : "flex-row"}`}
-      onPress={onPress}
-    >
-      {showCovers ? <CoverImage uri={book.thumbnail} title={book.title} className="h-36 w-24 rounded-xl" /> : null}
-      <View className={`${showCovers && !compactMode ? "ml-3" : ""} flex-1 gap-1`}>
+    <Pressable className={`mb-3 flex-row rounded-2xl p-3 shadow-soft ${cardSurfaceClass}`} onPress={onPress}>
+      <CoverImage uri={book.thumbnail} title={book.title} className="h-36 w-24 rounded-xl" />
+      <View className="ml-3 flex-1 gap-1">
         <Text className="text-base font-extrabold text-brand-700 dark:text-slate-100" numberOfLines={2}>
           {book.title}
         </Text>
@@ -42,6 +50,16 @@ const BookListItemComponent = ({ book, onPress, status, actions = [] }: Props) =
         {status ? (
           <View className="self-start">
             <StatusPill status={status} />
+          </View>
+        ) : null}
+        {shouldShowRating ? (
+          <View className="mt-1 flex-row items-center">
+            {Array.from({ length: 5 }, (_, index) => (
+              <Ionicons key={`rating-${index + 1}`} name={iconForRating(rating, index + 1)} size={14} color="#F59E0B" />
+            ))}
+            <Text className="ml-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              {rating.toFixed(1).replace(".", ",")}/5
+            </Text>
           </View>
         ) : null}
         {actions.length > 0 ? (

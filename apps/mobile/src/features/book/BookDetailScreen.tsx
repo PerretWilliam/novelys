@@ -29,10 +29,7 @@ export const BookDetailScreen = () => {
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
 
   const existingItem = useMemo(() => items.find((item) => item.book.sourceId === book.sourceId), [items, book.sourceId]);
-  const selectedListName = useMemo(
-    () => lists.find((list) => list.id === selectedListId)?.name,
-    [lists, selectedListId],
-  );
+  const hasLists = lists.length > 0;
 
   useEffect(() => {
     if (!selectedListId && lists.length > 0) {
@@ -116,7 +113,7 @@ export const BookDetailScreen = () => {
 
           <View className="flex-row gap-2">
             <Pressable
-              className="flex-1 rounded-xl bg-brand-700 px-4 py-3"
+              className={`${hasLists ? "flex-1" : "w-full"} rounded-xl bg-brand-700 px-4 py-3`}
               onPress={() =>
                 existingItem ? navigation.navigate("LibraryItem", { itemId: existingItem.id }) : void onAdd()
               }
@@ -126,62 +123,61 @@ export const BookDetailScreen = () => {
               </Text>
             </Pressable>
 
-            <Pressable className="flex-1 rounded-xl bg-slate-900 px-4 py-3" onPress={openListModal}>
-              <Text className="text-center font-black text-white">Ajouter à une liste</Text>
-            </Pressable>
+            {hasLists ? (
+              <Pressable className="flex-1 rounded-xl bg-slate-900 px-4 py-3" onPress={openListModal}>
+                <Text className="text-center font-black text-white">Ajouter à une liste</Text>
+              </Pressable>
+            ) : null}
           </View>
 
-          {selectedListName ? (
-            <Text className="text-xs text-slate-600 dark:text-slate-300">
-              Liste sélectionnée: <Text className="font-bold text-slate-800 dark:text-slate-100">{selectedListName}</Text>
-            </Text>
-          ) : null}
         </View>
       </View>
 
-      <Modal animationType="fade" transparent visible={isListModalOpen} onRequestClose={() => setIsListModalOpen(false)}>
-        <View className="flex-1 items-center justify-center bg-slate-900/55 px-5">
-          <View className={`w-full rounded-2xl p-4 ${cardSurfaceClass}`}>
-            <Text className="text-lg font-black text-slate-900 dark:text-slate-100">Choisir une liste</Text>
-            <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">Sélectionne où ajouter ce livre.</Text>
+      {hasLists ? (
+        <Modal animationType="fade" transparent visible={isListModalOpen} onRequestClose={() => setIsListModalOpen(false)}>
+          <View className="flex-1 items-center justify-center bg-slate-900/55 px-5">
+            <View className={`w-full rounded-2xl p-4 ${cardSurfaceClass}`}>
+              <Text className="text-lg font-black text-slate-900 dark:text-slate-100">Choisir une liste</Text>
+              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">Sélectionne où ajouter ce livre.</Text>
 
-            <View className="mt-4 max-h-72">
-              <ScrollView contentContainerClassName="gap-2 pb-2">
-                {lists.map((list) => (
-                  <Pressable
-                    key={list.id}
-                    className={`rounded-lg px-3 py-3 ${
-                      selectedListId === list.id ? "bg-brand-100 dark:bg-slate-700" : cardInsetClass
-                    }`}
-                    onPress={() => setSelectedListId(list.id)}
-                  >
-                    <Text
-                      className={`text-sm font-black ${
-                        selectedListId === list.id ? "text-brand-700 dark:text-brand-100" : "text-slate-800 dark:text-slate-100"
+              <View className="mt-4 max-h-72">
+                <ScrollView contentContainerClassName="gap-2 pb-2">
+                  {lists.map((list) => (
+                    <Pressable
+                      key={list.id}
+                      className={`rounded-lg px-3 py-3 ${
+                        selectedListId === list.id ? "bg-brand-100 dark:bg-slate-700" : cardInsetClass
                       }`}
+                      onPress={() => setSelectedListId(list.id)}
                     >
-                      {list.name}
-                    </Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">{list.itemCount} livre(s)</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
+                      <Text
+                        className={`text-sm font-black ${
+                          selectedListId === list.id ? "text-brand-700 dark:text-brand-100" : "text-slate-800 dark:text-slate-100"
+                        }`}
+                      >
+                        {list.name}
+                      </Text>
+                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">{list.itemCount} livre(s)</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
 
-            <View className="mt-4 flex-row gap-2">
-              <Pressable
-                className="flex-1 rounded-xl bg-slate-200 px-4 py-3 dark:bg-slate-700"
-                onPress={() => setIsListModalOpen(false)}
-              >
-                <Text className="text-center font-black text-slate-700 dark:text-slate-100">Annuler</Text>
-              </Pressable>
-              <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onAddToList()}>
-                <Text className="text-center font-black text-white">Ajouter</Text>
-              </Pressable>
+              <View className="mt-4 flex-row gap-2">
+                <Pressable
+                  className="flex-1 rounded-xl bg-slate-200 px-4 py-3 dark:bg-slate-700"
+                  onPress={() => setIsListModalOpen(false)}
+                >
+                  <Text className="text-center font-black text-slate-700 dark:text-slate-100">Annuler</Text>
+                </Pressable>
+                <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onAddToList()}>
+                  <Text className="text-center font-black text-white">Ajouter</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      ) : null}
     </ScrollView>
   );
 };

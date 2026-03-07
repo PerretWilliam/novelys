@@ -70,6 +70,7 @@ export const LibraryScreen = () => {
             key={item.id}
             book={item.book}
             status={item.status}
+            rating={item.rating}
             onPress={() => navigation.navigate("LibraryItem", { itemId: item.id })}
           />
         ))}

@@ -26,7 +26,7 @@ export const searchGoogleBooks = async (params: {
   const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${query.toString()}`);
 
   if (!response.ok) {
-    throw new Error(`Google Books failed with status ${response.status}`);
+    throw new Error(`Google Books a retourne le statut ${response.status}`);
   }
 
   const body = (await response.json()) as GoogleBooksResponse;

@@ -56,7 +56,7 @@ const insertBook = async (book: Book) => {
     .returning();
 
   if (!created) {
-    throw new HttpError(500, "Could not create book");
+    throw new HttpError(500, "Impossible de creer le livre");
   }
 
   return created;
@@ -79,7 +79,7 @@ const assertRatingState = (status: LibraryStatus | undefined, rating: number | n
   }
 
   if (status && status !== "read") {
-    throw new HttpError(400, "rating is only valid for read books");
+    throw new HttpError(400, "La note est disponible uniquement pour les livres lus");
   }
 };
 
@@ -96,7 +96,7 @@ export const createLibraryItem = async (payload: CreateLibraryItemInput) => {
     .limit(1);
 
   if (existingItem[0]) {
-    throw new HttpError(409, "Book already exists in your library");
+    throw new HttpError(409, "Ce livre est deja dans votre bibliotheque");
   }
 
   const now = nowIso();
@@ -116,7 +116,7 @@ export const createLibraryItem = async (payload: CreateLibraryItemInput) => {
     .returning();
 
   if (!item) {
-    throw new HttpError(500, "Could not create library item");
+    throw new HttpError(500, "Impossible de creer l'element de bibliotheque");
   }
 
   return mapLibraryRowToItem(item, book);
@@ -156,7 +156,7 @@ export const getLibraryItemById = async (id: number) => {
   const row = await getBookWithItem(id);
 
   if (!row) {
-    throw new HttpError(404, "Library item not found");
+    throw new HttpError(404, "Element de bibliotheque introuvable");
   }
 
   return mapLibraryRowToItem(row.item, row.book);
@@ -166,7 +166,7 @@ export const updateLibraryItem = async (id: number, payload: UpdateLibraryItemIn
   const existing = await getBookWithItem(id);
 
   if (!existing) {
-    throw new HttpError(404, "Library item not found");
+    throw new HttpError(404, "Element de bibliotheque introuvable");
   }
 
   const nextStatus = payload.status ?? (existing.item.status as LibraryStatus);
@@ -186,7 +186,7 @@ export const updateLibraryItem = async (id: number, payload: UpdateLibraryItemIn
     .returning();
 
   if (!updated) {
-    throw new HttpError(500, "Could not update library item");
+    throw new HttpError(500, "Impossible de mettre a jour l'element de bibliotheque");
   }
 
   return mapLibraryRowToItem(updated, existing.book);
@@ -196,7 +196,7 @@ export const deleteLibraryItem = async (id: number) => {
   const [removed] = await db.delete(libraryItemsTable).where(eq(libraryItemsTable.id, id)).returning();
 
   if (!removed) {
-    throw new HttpError(404, "Library item not found");
+    throw new HttpError(404, "Element de bibliotheque introuvable");
   }
 
   return { ok: true, id };

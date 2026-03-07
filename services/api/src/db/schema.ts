@@ -1,4 +1,4 @@
-import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { check, index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 export const booksTable = sqliteTable(
@@ -36,7 +36,7 @@ export const libraryItemsTable = sqliteTable(
       .notNull()
       .references(() => booksTable.id, { onDelete: "restrict" }),
     status: text("status").notNull(),
-    rating: integer("rating"),
+    rating: real("rating"),
     review: text("review"),
     startedAt: text("started_at"),
     finishedAt: text("finished_at"),
@@ -46,7 +46,8 @@ export const libraryItemsTable = sqliteTable(
   (table) => [
     index("library_items_status_idx").on(table.status),
     index("library_items_book_id_idx").on(table.bookId),
-    check("library_items_rating_range_chk", sql`rating IS NULL OR (rating BETWEEN 1 AND 5)`),
+    check("library_items_rating_range_chk", sql`rating IS NULL OR (rating BETWEEN 0.5 AND 5)`),
+    check("library_items_rating_step_chk", sql`rating IS NULL OR abs(rating * 2 - round(rating * 2)) < 0.000001`),
   ],
 );
 
@@ -86,8 +87,6 @@ export const userPreferencesTable = sqliteTable("user_preferences", {
   id: integer("id").primaryKey(),
   searchLang: text("search_lang").notNull(),
   themeMode: text("theme_mode").notNull(),
-  showCovers: integer("show_covers").notNull(),
-  compactMode: integer("compact_mode").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
 

@@ -9,10 +9,6 @@ type PreferencesValue = {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   resolvedTheme: "light" | "dark";
-  showCovers: boolean;
-  setShowCovers: (value: boolean) => void;
-  compactMode: boolean;
-  setCompactMode: (value: boolean) => void;
   isLoading: boolean;
   error: string | null;
 };
@@ -24,8 +20,6 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
   const { colorScheme, setColorScheme } = useColorScheme();
   const [searchLang, setSearchLangState] = useState<SearchLang>("fr");
   const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
-  const [showCovers, setShowCoversState] = useState(true);
-  const [compactMode, setCompactModeState] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +42,6 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
         }
         setSearchLangState(prefs.searchLang);
         setThemeModeState(prefs.themeMode);
-        setShowCoversState(prefs.showCovers);
-        setCompactModeState(prefs.compactMode);
       })
       .catch((err) => {
         if (!mounted) {
@@ -69,14 +61,12 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
   }, [api]);
 
   const persist = useCallback(
-    async (payload: Partial<{ searchLang: SearchLang; themeMode: ThemeMode; showCovers: boolean; compactMode: boolean }>) => {
+    async (payload: Partial<{ searchLang: SearchLang; themeMode: ThemeMode }>) => {
       setError(null);
       try {
         const next = await api.updatePreferences(payload);
         setSearchLangState(next.searchLang);
         setThemeModeState(next.themeMode);
-        setShowCoversState(next.showCovers);
-        setCompactModeState(next.compactMode);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Impossible de sauvegarder les préférences");
       }
@@ -88,22 +78,6 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
     (lang: SearchLang) => {
       setSearchLangState(lang);
       void persist({ searchLang: lang });
-    },
-    [persist],
-  );
-
-  const setShowCovers = useCallback(
-    (value: boolean) => {
-      setShowCoversState(value);
-      void persist({ showCovers: value });
-    },
-    [persist],
-  );
-
-  const setCompactMode = useCallback(
-    (value: boolean) => {
-      setCompactModeState(value);
-      void persist({ compactMode: value });
     },
     [persist],
   );
@@ -126,10 +100,6 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
       themeMode,
       setThemeMode,
       resolvedTheme,
-      showCovers,
-      setShowCovers,
-      compactMode,
-      setCompactMode,
       isLoading,
       error,
     }),
@@ -139,10 +109,6 @@ export const PreferencesProvider = ({ children }: { children: React.ReactNode })
       themeMode,
       setThemeMode,
       resolvedTheme,
-      showCovers,
-      setShowCovers,
-      compactMode,
-      setCompactMode,
       isLoading,
       error,
     ],

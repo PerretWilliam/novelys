@@ -8,8 +8,6 @@ import { HttpError } from "../../utils/http-error";
 const mapPreferencesRow = (row: typeof userPreferencesTable.$inferSelect): Preferences => ({
   searchLang: row.searchLang as Preferences["searchLang"],
   themeMode: row.themeMode as Preferences["themeMode"],
-  showCovers: row.showCovers === 1,
-  compactMode: row.compactMode === 1,
   updatedAt: row.updatedAt,
 });
 
@@ -32,8 +30,6 @@ export const updatePreferences = async (payload: UpdatePreferencesInput): Promis
     .set({
       searchLang: payload.searchLang,
       themeMode: payload.themeMode,
-      showCovers: payload.showCovers === undefined ? undefined : payload.showCovers ? 1 : 0,
-      compactMode: payload.compactMode === undefined ? undefined : payload.compactMode ? 1 : 0,
       updatedAt: nowIso(),
     })
     .where(eq(userPreferencesTable.id, 1))

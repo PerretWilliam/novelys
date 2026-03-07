@@ -32,7 +32,7 @@ export const updateReadingListInputSchema = z
     color: z.string().trim().max(20).nullable().optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
-    message: "At least one field must be provided",
+    message: "Au moins un champ doit etre fourni.",
   });
 
 export const addReadingListItemInputSchema = z.object({

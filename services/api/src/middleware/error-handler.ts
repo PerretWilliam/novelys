@@ -15,7 +15,7 @@ export const errorHandler = (
 
   if (error instanceof ZodError) {
     res.status(400).json({
-      message: "Validation error",
+      message: "Erreur de validation",
       errors: error.issues.map((issue) => ({
         path: issue.path.join("."),
         message: issue.message,
@@ -25,12 +25,12 @@ export const errorHandler = (
   }
 
   const isProduction = process.env.NODE_ENV === "production";
-  const message = error instanceof Error ? error.message : "Unexpected error";
+  const message = error instanceof Error ? error.message : "Erreur inattendue";
 
   if (!isProduction && error instanceof Error) {
     // eslint-disable-next-line no-console
     console.error(error);
   }
 
-  res.status(500).json({ message: isProduction ? "Internal server error" : message });
+  res.status(500).json({ message: isProduction ? "Erreur interne du serveur" : message });
 };

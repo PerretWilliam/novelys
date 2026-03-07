@@ -14,10 +14,6 @@ export const ProfileScreen = () => {
     setSearchLang,
     themeMode,
     setThemeMode,
-    showCovers,
-    setShowCovers,
-    compactMode,
-    setCompactMode,
     error,
   } = usePreferences();
   const { stats, isLoading: isStatsLoading, error: statsError } = useStats();
@@ -120,12 +116,6 @@ export const ProfileScreen = () => {
           </Pressable>
         </View>
 
-        <ToggleRow
-          title="Afficher les couvertures"
-          active={showCovers}
-          onToggle={() => setShowCovers(!showCovers)}
-        />
-        <ToggleRow title="Mode compact" active={compactMode} onToggle={() => setCompactMode(!compactMode)} />
       </View>
 
       {error ? <StateText message={error} kind="error" /> : null}
@@ -137,22 +127,5 @@ const MiniStat = ({ label, value }: { label: string; value: string }) => (
   <View className={`mb-2 w-[48%] rounded-xl px-3 py-2 ${cardInsetClass}`}>
     <Text className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">{label}</Text>
     <Text className="text-lg font-black text-slate-900 dark:text-slate-100">{value}</Text>
-  </View>
-);
-
-const ToggleRow = ({
-  title,
-  active,
-  onToggle,
-}: {
-  title: string;
-  active: boolean;
-  onToggle: () => void;
-}) => (
-  <View className="mb-2 flex-row items-center justify-between">
-    <Text className="text-sm text-slate-700 dark:text-slate-300">{title}</Text>
-    <Pressable className={`rounded-full px-3 py-1 ${active ? "bg-emerald-600" : "bg-slate-300 dark:bg-slate-600"}`} onPress={onToggle}>
-      <Text className="text-xs font-black text-white">{active ? "ACTIVÉ" : "DÉSACTIVÉ"}</Text>
-    </Pressable>
   </View>
 );
