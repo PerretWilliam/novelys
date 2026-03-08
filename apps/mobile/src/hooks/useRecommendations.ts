@@ -1,6 +1,7 @@
 import type { Book } from "@readingos/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLibrary } from "../contexts/LibraryContext";
+import { usePreferences } from "../contexts/PreferencesContext";
 import { useReadingLists } from "../contexts/ReadingListsContext";
 import { useApiClient } from "./useApiClient";
 
@@ -63,6 +64,34 @@ const dedupeBooks = (books: Book[]) =>
     return acc;
   }, []);
 
+const languagePrefix = (value?: string): string | null => {
+  if (!value) {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  const [prefix] = normalized.split(/[-_]/);
+  return prefix || null;
+};
+
+const preferProfileLanguage = (books: Book[], lang: "fr" | "en"): Book[] => {
+  const preferred: Book[] = [];
+  const others: Book[] = [];
+
+  for (const book of books) {
+    const prefix = languagePrefix(book.language);
+    if (prefix === lang) {
+      preferred.push(book);
+    } else {
+      others.push(book);
+    }
+  }
+
+  return [...preferred, ...others];
+};
+
 const parsePublishedDateScore = (value?: string): number => {
   if (!value) {
     return 0;
@@ -101,6 +130,7 @@ export const useRecommendations = (): RecommendationSource => {
   const api = useApiClient();
   const { items } = useLibrary();
   const { lists } = useReadingLists();
+  const { searchLang, isLoading: isPreferencesLoading } = usePreferences();
   const [recommendedForYou, setRecommendedForYou] = useState<Book[]>([]);
   const [exploreBooks, setExploreBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -110,6 +140,10 @@ export const useRecommendations = (): RecommendationSource => {
   const hasPersonalSignals = items.length > 0 || listNames.length > 0;
 
   const refresh = useCallback(async () => {
+    if (isPreferencesLoading) {
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -118,24 +152,25 @@ export const useRecommendations = (): RecommendationSource => {
       const personalQueries = seeds.length > 0 ? seeds : DEFAULT_PERSONAL_QUERIES;
 
       const [personalResponses, exploreResponses] = await Promise.all([
-        Promise.all(personalQueries.map((q) => api.searchBooks({ q, limit: QUERY_LIMIT }))),
-        Promise.all(EXPLORE_QUERIES.map((q) => api.searchBooks({ q, limit: QUERY_LIMIT }))),
+        Promise.all(personalQueries.map((q) => api.searchBooks({ q, lang: searchLang, limit: QUERY_LIMIT }))),
+        Promise.all(EXPLORE_QUERIES.map((q) => api.searchBooks({ q, lang: searchLang, limit: QUERY_LIMIT }))),
       ]);
 
       const existingIds = new Set(items.map((item) => item.book.sourceId));
-      const personal = dedupeBooks(personalResponses.flat().filter((book) => !existingIds.has(book.sourceId))).slice(
-        0,
-        MAX_RECOMMENDED,
-      );
+      const personal = preferProfileLanguage(
+        dedupeBooks(personalResponses.flat().filter((book) => !existingIds.has(book.sourceId))),
+        searchLang,
+      ).slice(0, MAX_RECOMMENDED);
       const personalIds = new Set(personal.map((book) => book.sourceId));
 
-      const explore = dedupeBooks(
-        exploreResponses
-          .flat()
-          .filter((book) => !existingIds.has(book.sourceId) && !personalIds.has(book.sourceId)),
-      )
-        .sort((a, b) => parsePublishedDateScore(b.publishedDate) - parsePublishedDateScore(a.publishedDate))
-        .slice(0, MAX_EXPLORE);
+      const explore = preferProfileLanguage(
+        dedupeBooks(
+          exploreResponses
+            .flat()
+            .filter((book) => !existingIds.has(book.sourceId) && !personalIds.has(book.sourceId)),
+        ).sort((a, b) => parsePublishedDateScore(b.publishedDate) - parsePublishedDateScore(a.publishedDate)),
+        searchLang,
+      ).slice(0, MAX_EXPLORE);
 
       setRecommendedForYou(personal);
       setExploreBooks(explore);
@@ -144,7 +179,7 @@ export const useRecommendations = (): RecommendationSource => {
     } finally {
       setIsLoading(false);
     }
-  }, [api, items, listNames]);
+  }, [api, isPreferencesLoading, items, listNames, searchLang]);
 
   useEffect(() => {
     void refresh();

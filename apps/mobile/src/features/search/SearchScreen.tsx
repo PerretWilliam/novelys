@@ -26,7 +26,7 @@ export const SearchScreen = () => {
   const { items, addBook } = useLibrary();
   const { showToast } = useToast();
   const { exploreBooks, isLoading: isExploreLoading } = useRecommendations();
-  const { query, setQuery, lang, setLang, suggestions, isSuggesting, hasMore, loadMore } = useSearchBooks();
+  const { query, setQuery, lang, suggestions, isSuggesting, hasMore, loadMore } = useSearchBooks();
   const trimmedQuery = query.trim();
   const existingSourceIds = new Set(items.map((item) => item.book.sourceId));
   const [exploreVisibleCount, setExploreVisibleCount] = useState(12);
@@ -121,68 +121,42 @@ export const SearchScreen = () => {
         />
       </View>
 
-      {trimmedQuery.length < 2 ? (
+      {trimmedQuery.length < 2 && searches.length > 0 ? (
         <View className={`mb-4 rounded-2xl p-3 ${cardSurfaceClass}`}>
           <View className="mb-2 flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Ionicons name="time-outline" size={18} color={appColors.primaryText} />
               <Text className="text-base font-extrabold text-text dark:text-text-dark">Recherches récentes</Text>
             </View>
-            {searches.length > 0 ? (
-              <Pressable onPress={clearSearches}>
-                <Text className="text-xs font-bold text-primary-text">Effacer</Text>
-              </Pressable>
-            ) : null}
+            <Pressable onPress={clearSearches}>
+              <Text className="text-xs font-bold text-primary-text">Effacer</Text>
+            </Pressable>
           </View>
 
-          {searches.length === 0 ? (
-            <Text className="text-xs text-muted dark:text-muted-dark">Aucune recherche récente.</Text>
-          ) : (
-            <View className="gap-2">
-              {searches.map((entry) => (
-                <View key={entry.id} className={`flex-row items-center justify-between rounded-xl px-3 py-2 ${cardInsetClass}`}>
-                  <Pressable
-                    className="mr-2 flex-1"
-                    onPress={() => {
-                      setLang(entry.lang);
-                      setQuery(entry.query);
-                    }}
-                  >
-                    <Text className="text-sm font-bold text-text dark:text-text-dark" numberOfLines={1}>
-                      {entry.query}
-                    </Text>
-                    <Text className="text-[11px] text-muted dark:text-text-soft-dark">Langue: {entry.lang.toUpperCase()}</Text>
-                  </Pressable>
-                  <Pressable onPress={() => removeSearch(entry.id)}>
-                    <Ionicons name="close-circle" size={20} color={appColors.dangerText} />
-                  </Pressable>
-                </View>
-              ))}
-            </View>
-          )}
+          <View className="gap-2">
+            {searches.map((entry) => (
+              <View key={entry.id} className={`flex-row items-center justify-between rounded-xl px-3 py-2 ${cardInsetClass}`}>
+                <Pressable
+                  className="mr-2 flex-1"
+                  onPress={() => {
+                    setQuery(entry.query);
+                  }}
+                >
+                  <Text className="text-sm font-bold text-text dark:text-text-dark" numberOfLines={1}>
+                    {entry.query}
+                  </Text>
+                  <Text className="text-[11px] text-muted dark:text-text-soft-dark">Langue: {entry.lang.toUpperCase()}</Text>
+                </Pressable>
+                <Pressable onPress={() => removeSearch(entry.id)}>
+                  <Ionicons name="close-circle" size={20} color={appColors.dangerText} />
+                </Pressable>
+              </View>
+            ))}
+          </View>
           {isRecentLoading ? <Text className="mt-2 text-xs text-muted dark:text-muted-dark">Synchronisation...</Text> : null}
           {recentError ? <Text className="mt-2 text-xs text-danger-text dark:text-danger-soft">{recentError}</Text> : null}
         </View>
       ) : null}
-
-      <View className="mb-3 flex-row gap-2">
-        <Pressable
-          className={`rounded-full px-3 py-2 ${lang === "fr" ? "bg-primary" : "bg-surface dark:bg-surface-3-dark"}`}
-          onPress={() => setLang("fr")}
-        >
-          <Text className={`text-xs font-black ${lang === "fr" ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"}`}>
-            FR
-          </Text>
-        </Pressable>
-        <Pressable
-          className={`rounded-full px-3 py-2 ${lang === "en" ? "bg-primary" : "bg-surface dark:bg-surface-3-dark"}`}
-          onPress={() => setLang("en")}
-        >
-          <Text className={`text-xs font-black ${lang === "en" ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"}`}>
-            EN
-          </Text>
-        </Pressable>
-      </View>
 
       {isSuggesting ? <BookLoader label="Recherche en cours" /> : null}
       {!isSuggesting && trimmedQuery.length >= 2 && suggestions.length === 0 ? (
