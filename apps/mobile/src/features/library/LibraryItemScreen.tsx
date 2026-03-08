@@ -4,7 +4,9 @@ import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { BookLoader } from "../../components/BookLoader";
 import { CoverImage } from "../../components/CoverImage";
+import { EmptyState } from "../../components/EmptyState";
 import { RatingStars } from "../../components/RatingStars";
 import { StateText } from "../../components/StateText";
 import { StatusSelector } from "../../components/StatusSelector";
@@ -61,7 +63,18 @@ export const LibraryItemScreen = () => {
   }, [status, rating]);
 
   if (!item) {
-    return <StateText message={isLoading ? "Chargement..." : "Élément introuvable."} />;
+    if (isLoading) {
+      return <BookLoader label="Chargement du livre" />;
+    }
+    return (
+      <View className="flex-1 px-4">
+        <EmptyState
+          icon="alert-circle-outline"
+          title="Livre introuvable"
+          description="Cet élément n'existe plus dans votre bibliothèque. Revenez en arrière pour recharger."
+        />
+      </View>
+    );
   }
 
   const onSave = async () => {
@@ -111,15 +124,15 @@ export const LibraryItemScreen = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-brand-50 dark:bg-slate-950" contentContainerClassName="pb-8">
-      <View className="bg-brand-50 px-4 py-4 dark:bg-slate-950">
+    <ScrollView className="flex-1 bg-canvas dark:bg-canvas-dark" contentContainerClassName="pb-8">
+      <View className="bg-canvas px-4 py-4 dark:bg-canvas-dark">
         <View className="flex-row">
           <CoverImage uri={item.book.thumbnail} title={item.book.title} className="h-44 w-32 rounded-xl" />
           <View className="ml-3 flex-1">
-            <Text className="text-lg font-black text-slate-900 dark:text-slate-100" numberOfLines={3}>
+            <Text className="text-lg font-black text-text dark:text-text-dark" numberOfLines={3}>
               {item.book.title}
             </Text>
-            <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">
+            <Text className="mt-1 text-xs text-muted dark:text-text-soft-dark">
               {item.book.authors.join(", ") || "Auteur non renseigné"}
             </Text>
           </View>
@@ -129,15 +142,10 @@ export const LibraryItemScreen = () => {
           <StatusSelector value={status} onChange={setStatus} />
         </View>
 
-        <RatingStars value={rating} onChange={setRating} disabled={status !== "read"} />
-        {status !== "read" ? (
-          <Text className="mt-2 text-xs text-slate-500 dark:text-slate-300">
-            La note est active uniquement quand le statut est "Lu".
-          </Text>
-        ) : null}
+        {status === "read" ? <RatingStars value={rating} onChange={setRating} /> : null}
 
         <TextInput
-          className="mt-3 min-h-[110px] rounded-xl bg-slate-100 px-3 py-3 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+          className="mt-3 min-h-[110px] rounded-xl bg-surface-2 px-3 py-3 text-text dark:bg-surface-2-dark dark:text-text-dark"
           value={review}
           onChangeText={setReview}
           placeholder="Ton avis"
@@ -147,31 +155,31 @@ export const LibraryItemScreen = () => {
 
         {hasLists ? (
           <View className="mt-4">
-            <Text className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-300">
+            <Text className="mb-2 text-xs font-bold uppercase tracking-wider text-muted dark:text-text-soft-dark">
               Listes personnalisées
             </Text>
-            <Pressable className="rounded-xl bg-slate-900 px-4 py-3" onPress={openListModal}>
-              <Text className="text-center font-black text-white">Choisir une liste</Text>
+            <Pressable className="rounded-xl bg-surface-dark px-4 py-3" onPress={openListModal}>
+              <Text className="text-center font-black text-neutral-inverse">Choisir une liste</Text>
             </Pressable>
           </View>
         ) : null}
 
         <View className="mt-4 flex-row gap-2">
-          <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onSave()}>
-            <Text className="text-center font-black text-white">Enregistrer</Text>
+          <Pressable className="flex-1 rounded-xl bg-primary px-4 py-3" onPress={() => void onSave()}>
+            <Text className="text-center font-black text-neutral-inverse">Enregistrer</Text>
           </Pressable>
-          <Pressable className="flex-1 rounded-xl bg-red-700 px-4 py-3" onPress={() => void onDelete()}>
-            <Text className="text-center font-black text-white">Supprimer</Text>
+          <Pressable className="flex-1 rounded-xl bg-danger px-4 py-3" onPress={() => void onDelete()}>
+            <Text className="text-center font-black text-neutral-inverse">Supprimer</Text>
           </Pressable>
         </View>
       </View>
 
       {hasLists ? (
         <Modal animationType="fade" transparent visible={isListModalOpen} onRequestClose={() => setIsListModalOpen(false)}>
-          <View className="flex-1 items-center justify-center bg-slate-900/55 px-5">
+          <View className="flex-1 items-center justify-center bg-overlay px-5">
             <View className={`w-full rounded-2xl p-4 ${cardSurfaceClass}`}>
-              <Text className="text-lg font-black text-slate-900 dark:text-slate-100">Choisir une liste</Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">Sélectionnez où ajouter ce livre.</Text>
+              <Text className="text-lg font-black text-text dark:text-text-dark">Choisir une liste</Text>
+              <Text className="mt-1 text-sm text-muted dark:text-text-soft-dark">Sélectionnez où ajouter ce livre.</Text>
 
               <View className="mt-4 max-h-72">
                 <ScrollView contentContainerClassName="gap-2 pb-2">
@@ -179,18 +187,18 @@ export const LibraryItemScreen = () => {
                     <Pressable
                       key={list.id}
                       className={`rounded-lg px-3 py-3 ${
-                        selectedListId === list.id ? "bg-brand-100 dark:bg-slate-700" : cardInsetClass
+                        selectedListId === list.id ? "bg-primary-soft dark:bg-surface-3-dark" : cardInsetClass
                       }`}
                       onPress={() => setSelectedListId(list.id)}
                     >
                       <Text
                         className={`text-sm font-black ${
-                          selectedListId === list.id ? "text-brand-700 dark:text-brand-100" : "text-slate-800 dark:text-slate-100"
+                          selectedListId === list.id ? "text-primary-text dark:text-primary-soft" : "text-text dark:text-text-dark"
                         }`}
                       >
                         {list.name}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300">{list.itemCount} livre(s)</Text>
+                      <Text className="mt-1 text-xs text-muted dark:text-text-soft-dark">{list.itemCount} livre(s)</Text>
                     </Pressable>
                   ))}
                 </ScrollView>
@@ -198,13 +206,13 @@ export const LibraryItemScreen = () => {
 
               <View className="mt-4 flex-row gap-2">
                 <Pressable
-                  className="flex-1 rounded-xl bg-slate-200 px-4 py-3 dark:bg-slate-700"
+                  className="flex-1 rounded-xl bg-surface-3 px-4 py-3 dark:bg-surface-3-dark"
                   onPress={() => setIsListModalOpen(false)}
                 >
-                  <Text className="text-center font-black text-slate-700 dark:text-slate-100">Annuler</Text>
+                  <Text className="text-center font-black text-text-soft dark:text-text-dark">Annuler</Text>
                 </Pressable>
-                <Pressable className="flex-1 rounded-xl bg-brand-700 px-4 py-3" onPress={() => void onAddToList()}>
-                  <Text className="text-center font-black text-white">Ajouter</Text>
+                <Pressable className="flex-1 rounded-xl bg-primary px-4 py-3" onPress={() => void onAddToList()}>
+                  <Text className="text-center font-black text-neutral-inverse">Ajouter</Text>
                 </Pressable>
               </View>
             </View>
