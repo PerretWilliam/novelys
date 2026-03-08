@@ -17,9 +17,9 @@ type ToastState = {
 const ToastContext = createContext<ToastValue | null>(null);
 
 const toneClass: Record<ToastKind, string> = {
-  success: "bg-emerald-600",
-  error: "bg-rose-600",
-  info: "bg-slate-800",
+  success: "bg-success",
+  error: "bg-danger",
+  info: "bg-surface-dark",
 };
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -104,7 +104,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
             }}
             className={`rounded-xl px-4 py-3 shadow-soft ${toneClass[toast.kind]}`}
           >
-            <Text className="text-sm font-bold text-white">{toast.message}</Text>
+            <Text className="text-sm font-bold text-neutral-inverse">{toast.message}</Text>
           </Animated.View>
         </View>
       ) : null}

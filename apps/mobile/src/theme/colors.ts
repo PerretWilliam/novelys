@@ -1,0 +1,18 @@
+export const appColors = {
+  primaryText: "#0f4c81",
+  dangerText: "#dc2626",
+  warningText: "#f59e0b",
+  mutedDark: "#94a3b8",
+  text: "#0f172a",
+  textDark: "#e2e8f0",
+  textSoft: "#64748b",
+  border: "#e2e8f0",
+  borderDark: "#334155",
+  surface: "#ffffff",
+  surfaceDark: "#0f172a",
+  surfaceActiveDark: "#1e293b",
+  surfaceActive: "#e0ecff",
+  canvas: "#eef8ff",
+  canvasDark: "#020617",
+  primarySoftDark: "#93c5fd",
+} as const;

@@ -15,7 +15,7 @@ export const AppRoot = () => {
           <LibraryProvider>
             <ReadingListsProvider>
               <ToastProvider>
-                <View className="flex-1 bg-brand-50 dark:bg-slate-950">
+                <View className="flex-1 bg-canvas dark:bg-canvas-dark">
                   <RootNavigator />
                 </View>
               </ToastProvider>

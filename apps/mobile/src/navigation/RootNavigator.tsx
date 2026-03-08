@@ -14,6 +14,7 @@ import { ListDetailScreen } from "../features/lists/ListDetailScreen";
 import { ListsScreen } from "../features/lists/ListsScreen";
 import { ProfileScreen } from "../features/profile/ProfileScreen";
 import { SearchScreen } from "../features/search/SearchScreen";
+import { appColors } from "../theme/colors";
 import type { MainTabParamList, RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -54,15 +55,15 @@ const TabsNavigator = () => {
     return {
       headerShown: false,
       tabBarShowLabel: false,
-      tabBarActiveTintColor: isDark ? "#E2E8F0" : "#0F172A",
-      tabBarInactiveTintColor: isDark ? "#94A3B8" : "#64748B",
+      tabBarActiveTintColor: isDark ? appColors.textDark : appColors.text,
+      tabBarInactiveTintColor: isDark ? appColors.mutedDark : appColors.textSoft,
       tabBarStyle: {
         height: 62 + insets.bottom,
         paddingTop: 8,
         paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
         borderTopWidth: 1,
-        borderTopColor: isDark ? "#334155" : "#E2E8F0",
-        backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+        borderTopColor: isDark ? appColors.borderDark : appColors.border,
+        backgroundColor: isDark ? appColors.surfaceDark : appColors.surface,
         elevation: 0,
       },
       tabBarItemStyle: {
@@ -76,18 +77,26 @@ const TabsNavigator = () => {
             borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: focused ? (isDark ? "#1E293B" : "#E0ECFF") : "transparent",
+            backgroundColor: focused ? (isDark ? appColors.surfaceActiveDark : appColors.surfaceActive) : "transparent",
           }}
         >
           <Ionicons
             name={focused ? activeIconMap[route.name] : iconMap[route.name]}
             size={22}
-            color={focused ? (isDark ? "#E2E8F0" : "#0F172A") : isDark ? "#94A3B8" : "#64748B"}
+            color={
+              focused
+                ? isDark
+                  ? appColors.textDark
+                  : appColors.text
+                : isDark
+                  ? appColors.mutedDark
+                  : appColors.textSoft
+            }
           />
         </View>
       ),
       sceneStyle: {
-        backgroundColor: isDark ? "#020617" : "#EEF8FF",
+        backgroundColor: isDark ? appColors.canvasDark : appColors.canvas,
         paddingHorizontal: 12,
         paddingTop: insets.top + 8,
         paddingBottom: 0,
@@ -131,11 +140,11 @@ export const RootNavigator = () => {
         ...DarkTheme,
         colors: {
           ...DarkTheme.colors,
-          background: "#020617",
-          card: "#0F172A",
-          text: "#E2E8F0",
-          border: "#334155",
-          primary: "#93C5FD",
+          background: appColors.canvasDark,
+          card: appColors.surfaceDark,
+          text: appColors.textDark,
+          border: appColors.borderDark,
+          primary: appColors.primarySoftDark,
         },
       }
     : undefined;
@@ -144,11 +153,11 @@ export const RootNavigator = () => {
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: isDark ? "#0F172A" : "#FFFFFF" },
-          headerTintColor: isDark ? "#E2E8F0" : "#0F4C81",
-          headerTitleStyle: { fontWeight: "700", color: isDark ? "#E2E8F0" : "#0F172A" },
+          headerStyle: { backgroundColor: isDark ? appColors.surfaceDark : appColors.surface },
+          headerTintColor: isDark ? appColors.textDark : appColors.primaryText,
+          headerTitleStyle: { fontWeight: "700", color: isDark ? appColors.textDark : appColors.text },
           headerBackButtonDisplayMode: "minimal",
-          contentStyle: { backgroundColor: isDark ? "#020617" : "#EEF8FF" },
+          contentStyle: { backgroundColor: isDark ? appColors.canvasDark : appColors.canvas },
         }}
       >
         <Stack.Screen
@@ -159,7 +168,10 @@ export const RootNavigator = () => {
         <Stack.Screen
           name="BookDetail"
           component={BookDetailScreen}
-          options={{ title: "Détails du livre", contentStyle: { backgroundColor: isDark ? "#020617" : "#FFFFFF" } }}
+          options={{
+            title: "Détails du livre",
+            contentStyle: { backgroundColor: isDark ? appColors.canvasDark : appColors.surface },
+          }}
         />
         <Stack.Screen
           name="ListDetail"
@@ -169,7 +181,10 @@ export const RootNavigator = () => {
         <Stack.Screen
           name="LibraryItem"
           component={LibraryItemScreen}
-          options={{ title: "Modifier l'élément", contentStyle: { backgroundColor: isDark ? "#020617" : "#FFFFFF" } }}
+          options={{
+            title: "Modifier l'élément",
+            contentStyle: { backgroundColor: isDark ? appColors.canvasDark : appColors.surface },
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

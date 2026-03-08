@@ -1,3 +1,3 @@
-export const cardSurfaceClass = "border border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-900";
+export const cardSurfaceClass = "border border-border bg-surface-2 dark:border-border-dark dark:bg-surface-dark";
 
-export const cardInsetClass = "border border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-800";
+export const cardInsetClass = "border border-border bg-surface-3 dark:border-border-strong-dark dark:bg-surface-2-dark";

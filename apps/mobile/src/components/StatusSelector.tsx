@@ -14,11 +14,11 @@ export const StatusSelector = ({ value, onChange }: Props) => {
         <Pressable
           key={status}
           className={`self-start rounded-full px-3 py-2 ${
-            value === status ? "bg-brand-700" : "bg-brand-100 dark:bg-slate-700"
+            value === status ? "bg-primary" : "bg-primary-soft dark:bg-surface-3-dark"
           }`}
           onPress={() => onChange(status)}
         >
-          <Text className={`text-xs font-black ${value === status ? "text-white" : "text-brand-700 dark:text-brand-100"}`}>
+          <Text className={`text-xs font-black ${value === status ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"}`}>
             {statusLabel[status]}
           </Text>
         </Pressable>

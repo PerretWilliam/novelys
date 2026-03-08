@@ -9,9 +9,9 @@ export const StateText = ({
 }) => {
   const color =
     kind === "error"
-      ? "text-red-700 dark:text-red-400"
+      ? "text-danger dark:text-danger-soft"
       : kind === "success"
-        ? "text-emerald-700 dark:text-emerald-400"
-        : "text-slate-600 dark:text-slate-300";
+        ? "text-success dark:text-success-soft"
+        : "text-muted dark:text-text-soft-dark";
   return <Text className={`mt-2 text-sm ${color}`}>{message}</Text>;
 };

@@ -20,10 +20,10 @@ const RecommendedBookCardComponent = ({ book, onPress, tone = "brand" }: Props) 
     <Pressable className={`mr-3 w-36 rounded-2xl border p-2 shadow-soft ${toneClass[tone]}`} onPress={onPress}>
       <CoverImage uri={book.thumbnail} title={book.title} className="h-44 w-full rounded-xl" />
       <View className="mt-2">
-        <Text className="text-sm font-bold text-slate-900 dark:text-slate-100" numberOfLines={2}>
+        <Text className="text-sm font-bold text-text dark:text-text-dark" numberOfLines={2}>
           {book.title}
         </Text>
-        <Text className="mt-1 text-xs text-slate-600 dark:text-slate-300" numberOfLines={1}>
+        <Text className="mt-1 text-xs text-muted dark:text-text-soft-dark" numberOfLines={1}>
           {book.authors[0] ?? "Auteur inconnu"}
         </Text>
       </View>
