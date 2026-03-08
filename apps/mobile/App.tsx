@@ -1,5 +1,6 @@
 import { AppRoot } from "./src/root/AppRoot";
 import { LogBox } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 LogBox.ignoreLogs(["SafeAreaView has been deprecated"]);
@@ -26,8 +27,10 @@ if (__DEV__) {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AppRoot />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppRoot />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
