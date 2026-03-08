@@ -15,6 +15,8 @@ export const bookSchema = z.object({
   language: z.string().optional(),
   thumbnail: z.string().url().optional(),
   previewLink: z.string().url().optional(),
+  averageRating: z.number().min(0).max(5).optional(),
+  ratingsCount: z.number().int().min(0).optional(),
 });
 
 export type Book = z.infer<typeof bookSchema>;

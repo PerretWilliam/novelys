@@ -63,8 +63,39 @@ const dedupeBooks = (books: Book[]) =>
     return acc;
   }, []);
 
+const parsePublishedDateScore = (value?: string): number => {
+  if (!value) {
+    return 0;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 0;
+  }
+
+  if (/^\d{4}$/.test(trimmed)) {
+    return Number(trimmed) * 10_000;
+  }
+
+  if (/^\d{4}-\d{2}$/.test(trimmed)) {
+    const ts = Date.parse(`${trimmed}-01T00:00:00.000Z`);
+    return Number.isNaN(ts) ? 0 : ts;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const ts = Date.parse(`${trimmed}T00:00:00.000Z`);
+    return Number.isNaN(ts) ? 0 : ts;
+  }
+
+  const ts = Date.parse(trimmed);
+  return Number.isNaN(ts) ? 0 : ts;
+};
+
 const DEFAULT_PERSONAL_QUERIES = ["roman contemporain", "science-fiction", "thriller psychologique", "fantasy"];
 const EXPLORE_QUERIES = ["classiques français", "prix littéraires", "biographies inspirantes", "mangas populaires"];
+const QUERY_LIMIT = 20;
+const MAX_RECOMMENDED = 80;
+const MAX_EXPLORE = 120;
 
 export const useRecommendations = (): RecommendationSource => {
   const api = useApiClient();
@@ -87,19 +118,24 @@ export const useRecommendations = (): RecommendationSource => {
       const personalQueries = seeds.length > 0 ? seeds : DEFAULT_PERSONAL_QUERIES;
 
       const [personalResponses, exploreResponses] = await Promise.all([
-        Promise.all(personalQueries.map((q) => api.searchBooks({ q, limit: 8 }))),
-        Promise.all(EXPLORE_QUERIES.map((q) => api.searchBooks({ q, limit: 8 }))),
+        Promise.all(personalQueries.map((q) => api.searchBooks({ q, limit: QUERY_LIMIT }))),
+        Promise.all(EXPLORE_QUERIES.map((q) => api.searchBooks({ q, limit: QUERY_LIMIT }))),
       ]);
 
       const existingIds = new Set(items.map((item) => item.book.sourceId));
-      const personal = dedupeBooks(personalResponses.flat().filter((book) => !existingIds.has(book.sourceId))).slice(0, 12);
+      const personal = dedupeBooks(personalResponses.flat().filter((book) => !existingIds.has(book.sourceId))).slice(
+        0,
+        MAX_RECOMMENDED,
+      );
       const personalIds = new Set(personal.map((book) => book.sourceId));
 
       const explore = dedupeBooks(
         exploreResponses
           .flat()
           .filter((book) => !existingIds.has(book.sourceId) && !personalIds.has(book.sourceId)),
-      ).slice(0, 12);
+      )
+        .sort((a, b) => parsePublishedDateScore(b.publishedDate) - parsePublishedDateScore(a.publishedDate))
+        .slice(0, MAX_EXPLORE);
 
       setRecommendedForYou(personal);
       setExploreBooks(explore);

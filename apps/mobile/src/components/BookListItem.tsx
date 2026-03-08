@@ -4,6 +4,7 @@ import { memo } from "react";
 import type { GestureResponderEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { formatPublishedDate } from "../lib/date";
+import { appColors } from "../theme/colors";
 import { cardSurfaceClass } from "../lib/ui";
 import { CoverImage } from "./CoverImage";
 import { StatusPill } from "./StatusPill";
@@ -34,19 +35,23 @@ const iconForRating = (rating: number, star: number): keyof typeof Ionicons.glyp
 };
 
 const BookListItemComponent = ({ book, onPress, status, rating, actions = [] }: Props) => {
-  const shouldShowRating = status !== undefined && typeof rating === "number" && rating > 0;
+  const localRating = typeof rating === "number" && rating > 0 ? rating : null;
+  const externalRating =
+    status === undefined && typeof book.averageRating === "number" && book.averageRating > 0 ? book.averageRating : null;
+  const displayRating = localRating ?? externalRating;
+  const shouldShowRating = displayRating !== null;
 
   return (
     <Pressable className={`mb-3 flex-row rounded-2xl p-3 shadow-soft ${cardSurfaceClass}`} onPress={onPress}>
       <CoverImage uri={book.thumbnail} title={book.title} className="h-36 w-24 rounded-xl" />
       <View className="ml-3 flex-1 gap-1">
-        <Text className="text-base font-extrabold text-brand-700 dark:text-slate-100" numberOfLines={2}>
+        <Text className="text-base font-extrabold text-primary-text dark:text-text-dark" numberOfLines={2}>
           {book.title}
         </Text>
-        <Text className="text-sm text-slate-600 dark:text-slate-300" numberOfLines={2}>
+        <Text className="text-sm text-muted dark:text-text-soft-dark" numberOfLines={2}>
           {book.authors.length > 0 ? book.authors.join(", ") : "Auteur non renseigné"}
         </Text>
-        <Text className="text-xs font-medium text-slate-500 dark:text-slate-400">{formatPublishedDate(book.publishedDate)}</Text>
+        <Text className="text-xs font-medium text-muted dark:text-muted-dark">{formatPublishedDate(book.publishedDate)}</Text>
         {status ? (
           <View className="self-start">
             <StatusPill status={status} />
@@ -55,10 +60,16 @@ const BookListItemComponent = ({ book, onPress, status, rating, actions = [] }: 
         {shouldShowRating ? (
           <View className="mt-1 flex-row items-center">
             {Array.from({ length: 5 }, (_, index) => (
-              <Ionicons key={`rating-${index + 1}`} name={iconForRating(rating, index + 1)} size={14} color="#F59E0B" />
+              <Ionicons
+                key={`rating-${index + 1}`}
+                name={iconForRating(displayRating, index + 1)}
+                size={14}
+                color={appColors.warningText}
+              />
             ))}
-            <Text className="ml-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              {rating.toFixed(1).replace(".", ",")}/5
+            <Text className="ml-1 text-xs font-semibold text-muted dark:text-text-soft-dark">
+              {displayRating.toFixed(1).replace(".", ",")}/5
+              {externalRating !== null && typeof book.ratingsCount === "number" ? ` (${book.ratingsCount})` : ""}
             </Text>
           </View>
         ) : null}
@@ -68,11 +79,11 @@ const BookListItemComponent = ({ book, onPress, status, rating, actions = [] }: 
               <Pressable
                 key={action.key}
                 className={`self-start rounded-full px-3 py-2 ${
-                  action.tone === "danger" ? "bg-red-700" : "bg-brand-700"
+                  action.tone === "danger" ? "bg-danger" : "bg-primary"
                 }`}
                 onPress={action.onPress}
               >
-                <Text className="text-xs font-black text-white">{action.label}</Text>
+                <Text className="text-xs font-black text-neutral-inverse">{action.label}</Text>
               </Pressable>
             ))}
           </View>

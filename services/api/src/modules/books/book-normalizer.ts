@@ -17,6 +17,8 @@ type GoogleVolume = {
     categories?: string[];
     language?: string;
     previewLink?: string;
+    averageRating?: number;
+    ratingsCount?: number;
     industryIdentifiers?: GoogleIdentifier[];
     imageLinks?: {
       thumbnail?: string;
@@ -61,13 +63,33 @@ export const normalizeGoogleBook = (input: unknown): Book | null => {
     language: volume.volumeInfo.language,
     thumbnail: normalizeThumbnail(volume.volumeInfo.imageLinks?.thumbnail),
     previewLink: volume.volumeInfo.previewLink,
+    averageRating:
+      typeof volume.volumeInfo.averageRating === "number" &&
+      volume.volumeInfo.averageRating >= 0 &&
+      volume.volumeInfo.averageRating <= 5
+        ? volume.volumeInfo.averageRating
+        : undefined,
+    ratingsCount:
+      typeof volume.volumeInfo.ratingsCount === "number" && volume.volumeInfo.ratingsCount >= 0
+        ? Math.floor(volume.volumeInfo.ratingsCount)
+        : undefined,
   };
 };
 
 export const rankBooks = (books: Book[]): Book[] => {
   return [...books].sort((a, b) => {
-    const scoreA = Number(Boolean(a.isbn13)) + Number(Boolean(a.thumbnail)) + Number(Boolean(a.pageCount));
-    const scoreB = Number(Boolean(b.isbn13)) + Number(Boolean(b.thumbnail)) + Number(Boolean(b.pageCount));
+    const scoreA =
+      Number(Boolean(a.averageRating)) * 3 +
+      Math.min(3, Math.floor((a.ratingsCount ?? 0) / 100)) +
+      Number(Boolean(a.isbn13)) +
+      Number(Boolean(a.thumbnail)) +
+      Number(Boolean(a.pageCount));
+    const scoreB =
+      Number(Boolean(b.averageRating)) * 3 +
+      Math.min(3, Math.floor((b.ratingsCount ?? 0) / 100)) +
+      Number(Boolean(b.isbn13)) +
+      Number(Boolean(b.thumbnail)) +
+      Number(Boolean(b.pageCount));
     return scoreB - scoreA;
   });
 };
