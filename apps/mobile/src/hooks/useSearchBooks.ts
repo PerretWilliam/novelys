@@ -1,18 +1,21 @@
-import type { Book, SearchLang } from "@readingos/shared";
+import type { Book } from "@readingos/shared";
 import { useEffect, useRef, useState } from "react";
 import { usePreferences } from "../contexts/PreferencesContext";
 import { useApiClient } from "./useApiClient";
 import { useDebouncedValue } from "./useDebouncedValue";
 
+const INITIAL_LIMIT = 8;
+const PAGE_SIZE = 8;
+const MAX_LIMIT = 48;
+
 export const useSearchBooks = () => {
   const api = useApiClient();
   const { searchLang, setSearchLang } = usePreferences();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Book[]>([]);
   const [suggestions, setSuggestions] = useState<Book[]>([]);
   const [isSuggesting, setIsSuggesting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useState(INITIAL_LIMIT);
+  const [hasMore, setHasMore] = useState(false);
   const requestIdRef = useRef(0);
   const debouncedQuery = useDebouncedValue(query.trim(), 350);
 
@@ -20,6 +23,8 @@ export const useSearchBooks = () => {
     if (debouncedQuery.length < 2) {
       setSuggestions([]);
       setIsSuggesting(false);
+      setLimit(INITIAL_LIMIT);
+      setHasMore(false);
       return;
     }
 
@@ -27,15 +32,17 @@ export const useSearchBooks = () => {
     setIsSuggesting(true);
 
     void api
-      .searchBooks({ q: debouncedQuery, lang: searchLang, limit: 6 })
+      .searchBooks({ q: debouncedQuery, lang: searchLang, limit })
       .then((books) => {
         if (requestId === requestIdRef.current) {
           setSuggestions(books);
+          setHasMore(books.length >= limit && limit < MAX_LIMIT);
         }
       })
       .catch(() => {
         if (requestId === requestIdRef.current) {
           setSuggestions([]);
+          setHasMore(false);
         }
       })
       .finally(() => {
@@ -43,30 +50,17 @@ export const useSearchBooks = () => {
           setIsSuggesting(false);
         }
       });
-  }, [api, debouncedQuery, searchLang]);
+  }, [api, debouncedQuery, limit, searchLang]);
 
-  const runSearch = async (nextQuery?: string, langOverride?: SearchLang): Promise<string | null> => {
-    const finalQuery = (nextQuery ?? query).trim();
-    if (!finalQuery) {
-      return null;
+  useEffect(() => {
+    setLimit(INITIAL_LIMIT);
+  }, [debouncedQuery, searchLang]);
+
+  const loadMore = () => {
+    if (isSuggesting || !hasMore) {
+      return;
     }
-    const finalLang = langOverride ?? searchLang;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const next = await api.searchBooks({ q: finalQuery, lang: finalLang, limit: 20 });
-      setResults(next);
-      setQuery(finalQuery);
-      setSuggestions([]);
-      return finalQuery;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Recherche impossible");
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
+    setLimit((prev) => Math.min(prev + PAGE_SIZE, MAX_LIMIT));
   };
 
   return {
@@ -74,11 +68,9 @@ export const useSearchBooks = () => {
     setQuery,
     lang: searchLang,
     setLang: setSearchLang,
-    results,
     suggestions,
     isSuggesting,
-    isLoading,
-    error,
-    runSearch,
+    hasMore,
+    loadMore,
   };
 };
