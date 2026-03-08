@@ -7,6 +7,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { BookListItem } from "../../components/BookListItem";
 import { BookLoader } from "../../components/BookLoader";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { EmptyState } from "../../components/EmptyState";
 import { useLibrary } from "../../contexts/LibraryContext";
 import { useRecentSearches } from "../../contexts/RecentSearchesContext";
@@ -30,6 +31,7 @@ export const SearchScreen = () => {
   const trimmedQuery = query.trim();
   const existingSourceIds = new Set(items.map((item) => item.book.sourceId));
   const [exploreVisibleCount, setExploreVisibleCount] = useState(12);
+  const [isClearRecentConfirmOpen, setIsClearRecentConfirmOpen] = useState(false);
 
   useEffect(() => {
     setExploreVisibleCount(12);
@@ -128,7 +130,7 @@ export const SearchScreen = () => {
               <Ionicons name="time-outline" size={18} color={appColors.primaryText} />
               <Text className="text-base font-extrabold text-text dark:text-text-dark">Recherches récentes</Text>
             </View>
-            <Pressable onPress={clearSearches}>
+            <Pressable onPress={() => setIsClearRecentConfirmOpen(true)}>
               <Text className="text-xs font-bold text-primary-text">Effacer</Text>
             </Pressable>
           </View>
@@ -239,6 +241,19 @@ export const SearchScreen = () => {
           </>
         ) : null}
       </View>
+
+      <ConfirmDialog
+        visible={isClearRecentConfirmOpen}
+        title="Effacer les recherches récentes ?"
+        message="Cette action supprime tout votre historique de recherches."
+        confirmLabel="Tout effacer"
+        cancelLabel="Annuler"
+        onCancel={() => setIsClearRecentConfirmOpen(false)}
+        onConfirm={() => {
+          setIsClearRecentConfirmOpen(false);
+          clearSearches();
+        }}
+      />
     </ScrollView>
   );
 };

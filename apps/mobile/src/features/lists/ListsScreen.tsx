@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { BookLoader } from "../../components/BookLoader";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { CoverImage } from "../../components/CoverImage";
 import { EmptyState } from "../../components/EmptyState";
 import { StateText } from "../../components/StateText";
@@ -20,6 +21,7 @@ export const ListsScreen = () => {
   const { lists, isLoading, error, createList, deleteList } = useReadingLists();
   const { showToast } = useToast();
   const [newListName, setNewListName] = useState("");
+  const [listToDelete, setListToDelete] = useState<{ id: number; name: string } | null>(null);
 
   const onCreateList = async () => {
     const name = newListName.trim();
@@ -98,7 +100,7 @@ export const ListsScreen = () => {
                 className="rounded-full bg-danger px-3 py-2"
                 onPress={(event) => {
                   event.stopPropagation();
-                  void onDeleteList(list.id);
+                  setListToDelete({ id: list.id, name: list.name });
                 }}
                 hitSlop={8}
               >
@@ -123,6 +125,27 @@ export const ListsScreen = () => {
           </Pressable>
         ))}
       </View>
+
+      <ConfirmDialog
+        visible={Boolean(listToDelete)}
+        title="Supprimer cette liste ?"
+        message={
+          listToDelete
+            ? `La liste « ${listToDelete.name} » sera supprimée. Les livres restent dans votre bibliothèque.`
+            : ""
+        }
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        onCancel={() => setListToDelete(null)}
+        onConfirm={() => {
+          if (!listToDelete) {
+            return;
+          }
+          const { id } = listToDelete;
+          setListToDelete(null);
+          void onDeleteList(id);
+        }}
+      />
     </ScrollView>
   );
 };

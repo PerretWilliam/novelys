@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { BookLoader } from "../../components/BookLoader";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { CoverImage } from "../../components/CoverImage";
 import { EmptyState } from "../../components/EmptyState";
 import { RatingStars } from "../../components/RatingStars";
@@ -32,6 +33,7 @@ export const LibraryItemScreen = () => {
   const [rating, setRating] = useState<number | null>(item?.rating ?? null);
   const [review, setReview] = useState(item?.review ?? "");
   const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
   const hasLists = lists.length > 0;
 
@@ -168,7 +170,7 @@ export const LibraryItemScreen = () => {
           <Pressable className="flex-1 rounded-xl bg-primary px-4 py-3" onPress={() => void onSave()}>
             <Text className="text-center font-black text-neutral-inverse">Enregistrer</Text>
           </Pressable>
-          <Pressable className="flex-1 rounded-xl bg-danger px-4 py-3" onPress={() => void onDelete()}>
+          <Pressable className="flex-1 rounded-xl bg-danger px-4 py-3" onPress={() => setIsDeleteConfirmOpen(true)}>
             <Text className="text-center font-black text-neutral-inverse">Supprimer</Text>
           </Pressable>
         </View>
@@ -219,6 +221,19 @@ export const LibraryItemScreen = () => {
           </View>
         </Modal>
       ) : null}
+
+      <ConfirmDialog
+        visible={isDeleteConfirmOpen}
+        title="Supprimer ce livre ?"
+        message="Cette action retire ce livre de votre bibliothèque."
+        confirmLabel="Supprimer"
+        cancelLabel="Conserver"
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={() => {
+          setIsDeleteConfirmOpen(false);
+          void onDelete();
+        }}
+      />
     </ScrollView>
   );
 };

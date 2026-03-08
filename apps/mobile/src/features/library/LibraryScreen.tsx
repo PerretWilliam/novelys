@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { BookListItem } from "../../components/BookListItem";
 import { BookLoader } from "../../components/BookLoader";
@@ -20,6 +20,8 @@ import type { MainTabParamList, RootStackParamList } from "../../navigation/type
 type LibraryRoute = RouteProp<MainTabParamList, "LibraryTab">;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
 type SortMode = "date" | "author";
+type SortOrder = "asc" | "desc";
+const STATUS_OPTIONS: Array<LibraryStatus | "all"> = ["all", "to_read", "reading", "read", "abandoned"];
 
 const parseSortableDate = (value?: string): number => {
   if (!value) {
@@ -58,6 +60,21 @@ export const LibraryScreen = () => {
   const [status, setStatus] = useState<LibraryStatus | "all">(defaultStatus);
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("date");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
+
+  const selectStatus = (nextStatus: LibraryStatus | "all") => {
+    setStatus(nextStatus);
+    setIsStatusMenuOpen(false);
+  };
+
+  const toggleSortMode = () => {
+    setSortMode((prev) => (prev === "date" ? "author" : "date"));
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
 
   useEffect(() => {
     setStatus(defaultStatus);
@@ -74,7 +91,8 @@ export const LibraryScreen = () => {
         const authorA = a.book.authors[0]?.trim() ?? "";
         const authorB = b.book.authors[0]?.trim() ?? "";
         if (!authorA && !authorB) {
-          return a.book.title.localeCompare(b.book.title, "fr", { sensitivity: "base" });
+          const byTitle = a.book.title.localeCompare(b.book.title, "fr", { sensitivity: "base" });
+          return sortOrder === "asc" ? byTitle : -byTitle;
         }
         if (!authorA) {
           return 1;
@@ -82,7 +100,8 @@ export const LibraryScreen = () => {
         if (!authorB) {
           return -1;
         }
-        return authorA.localeCompare(authorB, "fr", { sensitivity: "base" });
+        const byAuthor = authorA.localeCompare(authorB, "fr", { sensitivity: "base" });
+        return sortOrder === "asc" ? byAuthor : -byAuthor;
       });
       return next;
     }
@@ -91,12 +110,13 @@ export const LibraryScreen = () => {
       const dateA = parseSortableDate(a.book.publishedDate) || parseSortableDate(a.createdAt);
       const dateB = parseSortableDate(b.book.publishedDate) || parseSortableDate(b.createdAt);
       if (dateA !== dateB) {
-        return dateB - dateA;
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
       }
-      return a.book.title.localeCompare(b.book.title, "fr", { sensitivity: "base" });
+      const byTitle = a.book.title.localeCompare(b.book.title, "fr", { sensitivity: "base" });
+      return sortOrder === "asc" ? byTitle : -byTitle;
     });
     return next;
-  }, [items, sortMode]);
+  }, [items, sortMode, sortOrder]);
 
   const updateStatusFromSwipe = useCallback(
     async (id: number, nextStatus: LibraryStatus) => {
@@ -139,45 +159,34 @@ export const LibraryScreen = () => {
         autoCapitalize="none"
       />
 
-      <View className="mb-3 flex-row flex-wrap gap-2">
-        {(["all", "to_read", "reading", "read", "abandoned"] as const).map((value) => (
+      <View className={`mb-3 rounded-2xl p-3 ${cardInsetClass}`}>
+        <Text className="text-sm font-extrabold text-text dark:text-text-dark">Filtres</Text>
+        <View className="mt-2 gap-2">
           <Pressable
-            key={value}
-            className={`rounded-full px-3 py-2 ${status === value ? "bg-primary" : "bg-canvas dark:bg-surface-3-dark"}`}
-            onPress={() => setStatus(value)}
+            className="flex-row items-center justify-between rounded-xl bg-canvas px-3 py-2 dark:bg-surface-3-dark"
+            onPress={() => setIsStatusMenuOpen(true)}
           >
-            <Text className={`text-xs font-black ${status === value ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"}`}>
-              {value === "all" ? "Toutes" : statusLabel[value]}
+            <Text className="text-xs font-bold text-text dark:text-text-dark">Statut</Text>
+            <View className="flex-row items-center gap-1">
+              <Text className="text-xs font-black text-primary-text dark:text-primary-soft">
+                {status === "all" ? "Toutes" : statusLabel[status]}
+              </Text>
+              <Ionicons name="chevron-down" size={14} color={appColors.primaryText} />
+            </View>
+          </Pressable>
+          <Pressable className="flex-row items-center justify-between rounded-xl bg-canvas px-3 py-2 dark:bg-surface-3-dark" onPress={toggleSortMode}>
+            <Text className="text-xs font-bold text-text dark:text-text-dark">Tri</Text>
+            <Text className="text-xs font-black text-primary-text dark:text-primary-soft">
+              {sortMode === "date" ? "Date" : "Auteur"}
             </Text>
           </Pressable>
-        ))}
-      </View>
-
-      <View className="mb-3 flex-row gap-2">
-        <Pressable
-          className={`rounded-full px-3 py-2 ${sortMode === "date" ? "bg-primary" : "bg-canvas dark:bg-surface-3-dark"}`}
-          onPress={() => setSortMode("date")}
-        >
-          <Text
-            className={`text-xs font-black ${
-              sortMode === "date" ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"
-            }`}
-          >
-            Date
-          </Text>
-        </Pressable>
-        <Pressable
-          className={`rounded-full px-3 py-2 ${sortMode === "author" ? "bg-primary" : "bg-canvas dark:bg-surface-3-dark"}`}
-          onPress={() => setSortMode("author")}
-        >
-          <Text
-            className={`text-xs font-black ${
-              sortMode === "author" ? "text-neutral-inverse" : "text-primary-text dark:text-primary-soft"
-            }`}
-          >
-            Auteur
-          </Text>
-        </Pressable>
+          <Pressable className="flex-row items-center justify-between rounded-xl bg-canvas px-3 py-2 dark:bg-surface-3-dark" onPress={toggleSortOrder}>
+            <Text className="text-xs font-bold text-text dark:text-text-dark">Ordre</Text>
+            <Text className="text-xs font-black text-primary-text dark:text-primary-soft">
+              {sortOrder === "asc" ? "Ascendant" : "Descendant"}
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {isLoading ? <BookLoader label="Chargement de votre bibliothèque" /> : null}
@@ -215,6 +224,28 @@ export const LibraryScreen = () => {
           </Swipeable>
         ))}
       </View>
+
+      <Modal transparent visible={isStatusMenuOpen} animationType="fade" onRequestClose={() => setIsStatusMenuOpen(false)}>
+        <Pressable className="flex-1 items-center justify-center bg-overlay px-6" onPress={() => setIsStatusMenuOpen(false)}>
+          <Pressable className="w-full max-w-md rounded-2xl bg-surface p-3 dark:bg-surface-dark">
+            <Text className="mb-2 text-sm font-extrabold text-text dark:text-text-dark">Choisir un statut</Text>
+            {STATUS_OPTIONS.map((option) => {
+              const active = option === status;
+              return (
+                <Pressable
+                  key={option}
+                  className={`mb-1 rounded-xl px-3 py-3 ${active ? "bg-primary-soft dark:bg-primary" : "bg-canvas dark:bg-surface-3-dark"}`}
+                  onPress={() => selectStatus(option)}
+                >
+                  <Text className={`text-sm font-bold ${active ? "text-primary-text dark:text-neutral-inverse" : "text-text dark:text-text-dark"}`}>
+                    {option === "all" ? "Toutes" : statusLabel[option]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 };
