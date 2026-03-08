@@ -1,82 +1,90 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { RecommendedBookCard } from "../../components/RecommendedBookCard";
+import { BookListItem } from "../../components/BookListItem";
+import { BookLoader } from "../../components/BookLoader";
+import { EmptyState } from "../../components/EmptyState";
 import { useRecommendations } from "../../hooks/useRecommendations";
 import { cardSurfaceClass } from "../../lib/ui";
+import { appColors } from "../../theme/colors";
 import type { RootStackParamList } from "../../navigation/types";
 
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
 
 export const HomeScreen = () => {
   const navigation = useNavigation<RootNavigation>();
-  const { recommendedForYou, exploreBooks, isLoading, error, hasPersonalSignals, refresh } = useRecommendations();
+  const { recommendedForYou, isLoading, error, hasPersonalSignals, refresh } = useRecommendations();
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [recommendedForYou]);
+
+  const visibleRecommended = useMemo(
+    () => recommendedForYou.slice(0, visibleCount),
+    [recommendedForYou, visibleCount],
+  );
+
+  const handleScrollEnd = ({
+    nativeEvent,
+  }: {
+    nativeEvent: { layoutMeasurement: { height: number }; contentOffset: { y: number }; contentSize: { height: number } };
+  }) => {
+    const paddingToBottom = 180;
+    const reachedBottom =
+      nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - paddingToBottom;
+    if (!reachedBottom) {
+      return;
+    }
+    setVisibleCount((prev) => Math.min(prev + 8, recommendedForYou.length));
+  };
 
   return (
-    <ScrollView className="flex-1" contentContainerClassName="pb-8">
+    <ScrollView className="flex-1" contentContainerClassName="pb-8" onScroll={handleScrollEnd} scrollEventThrottle={16}>
       <View className="mb-3 flex-row items-center gap-2">
-        <Ionicons name="home" size={20} color="#0F4C81" />
-        <Text className="text-xl font-black text-slate-900 dark:text-slate-100">Accueil</Text>
+        <Ionicons name="home" size={20} color={appColors.primaryText} />
+        <Text className="text-xl font-black text-text dark:text-text-dark">Accueil</Text>
       </View>
 
       <View className={`mb-4 rounded-2xl p-3 ${cardSurfaceClass}`}>
         <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="sparkles-outline" size={18} color="#0F4C81" />
-            <Text className="text-base font-extrabold text-slate-900 dark:text-slate-100">Recommandés pour vous</Text>
+            <Ionicons name="sparkles-outline" size={18} color={appColors.primaryText} />
+            <Text className="text-base font-extrabold text-text dark:text-text-dark">Recommandés pour vous</Text>
           </View>
-          <Pressable className="rounded-full bg-slate-200 px-3 py-1.5 dark:bg-slate-800" onPress={() => void refresh()}>
-            <Text className="text-xs font-bold text-brand-700 dark:text-brand-100">Actualiser</Text>
+          <Pressable className="rounded-full bg-surface-3 px-3 py-1.5 dark:bg-surface-2-dark" onPress={() => void refresh()}>
+            <Text className="text-xs font-bold text-primary-text dark:text-primary-soft">Actualiser</Text>
           </Pressable>
         </View>
-        <Text className="text-xs text-slate-600 dark:text-slate-300">
+        <Text className="text-xs text-muted dark:text-text-soft-dark">
           {hasPersonalSignals
             ? "Basés sur votre bibliothèque et vos listes."
             : "Suggestions pour démarrer votre bibliothèque."}
         </Text>
       </View>
 
-      {isLoading ? <Text className="text-sm text-slate-500 dark:text-slate-400">Chargement des recommandations...</Text> : null}
-      {!isLoading && error ? <Text className="text-sm text-red-600 dark:text-red-400">{error}</Text> : null}
+      {isLoading ? <BookLoader label="Préparation de vos recommandations" /> : null}
+      {!isLoading && error ? <Text className="text-sm text-danger-text dark:text-danger-soft">{error}</Text> : null}
 
       {!isLoading && !error ? (
         <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="mb-4 pr-2">
-            {recommendedForYou.map((book) => (
-              <RecommendedBookCard
+          <View className="mb-4">
+            {visibleRecommended.map((book) => (
+              <BookListItem
                 key={book.sourceId}
                 book={book}
-                tone="brand"
                 onPress={() => navigation.navigate("BookDetail", { book })}
               />
             ))}
-          </ScrollView>
-          {recommendedForYou.length === 0 ? (
-            <Text className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-              Aucune recommandation personnalisée pour le moment.
-            </Text>
-          ) : null}
-
-          <View className={`mb-3 rounded-2xl p-3 ${cardSurfaceClass}`}>
-            <View className="mb-1 flex-row items-center gap-2">
-              <Ionicons name="book-outline" size={18} color="#0F4C81" />
-              <Text className="text-base font-extrabold text-slate-900 dark:text-slate-100">À explorer</Text>
-            </View>
-            <Text className="text-xs text-slate-600 dark:text-slate-300">Sélection découverte pour varier vos lectures.</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="pr-2">
-            {exploreBooks.slice(0, 8).map((book) => (
-              <RecommendedBookCard
-                key={book.sourceId}
-                book={book}
-                tone="amber"
-                onPress={() => navigation.navigate("BookDetail", { book })}
-              />
-            ))}
-          </ScrollView>
-          {exploreBooks.length === 0 ? (
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Aucun livre à explorer pour le moment.</Text>
+          {recommendedForYou.length === 0 ? (
+            <EmptyState
+              icon="sparkles-outline"
+              title="Pas encore de recommandations"
+              description="Ajoutez quelques livres à votre bibliothèque pour recevoir des suggestions personnalisées."
+            />
           ) : null}
         </>
       ) : null}
